@@ -1,4 +1,7 @@
-# alumdb
+<p align="center">
+  <img src="docs/images/banner.png" alt="TSG banner image"/>
+</p>
 
-AluminiumDB is an append-only fixed-size database
-written in Rust.
+> **WARNING**: this database is highly experimental,
+> and while we do plan to dogfeed on it as soon as we can for some of our own applications,
+> it is not advised to use it in a production environment already.

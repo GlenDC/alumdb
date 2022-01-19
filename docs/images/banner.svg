@@ -1,0 +1,135 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!-- Created with Inkscape (http://www.inkscape.org/) -->
+
+<svg
+   width="200mm"
+   height="58mm"
+   viewBox="0 0 200 58"
+   version="1.1"
+   id="svg5"
+   inkscape:version="1.1 (c4e8f9e, 2021-05-24)"
+   sodipodi:docname="banner.svg"
+   inkscape:export-filename="/Users/glendc/code/github.com/plabayo/tsg/docs/images/banner.png"
+   inkscape:export-xdpi="150.08253"
+   inkscape:export-ydpi="150.08253"
+   xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
+   xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
+   xmlns="http://www.w3.org/2000/svg"
+   xmlns:svg="http://www.w3.org/2000/svg">
+  <sodipodi:namedview
+     id="namedview7"
+     pagecolor="#505050"
+     bordercolor="#eeeeee"
+     borderopacity="1"
+     inkscape:pageshadow="0"
+     inkscape:pageopacity="0"
+     inkscape:pagecheckerboard="0"
+     inkscape:document-units="mm"
+     showgrid="false"
+     inkscape:zoom="1.3319949"
+     inkscape:cx="396.77329"
+     inkscape:cy="153.52912"
+     inkscape:window-width="1813"
+     inkscape:window-height="950"
+     inkscape:window-x="34"
+     inkscape:window-y="46"
+     inkscape:window-maximized="0"
+     inkscape:current-layer="layer1" />
+  <defs
+     id="defs2" />
+  <g
+     inkscape:label="Layer 1"
+     inkscape:groupmode="layer"
+     id="layer1">
+    <rect
+       style="fill:#b4c8c8;fill-opacity:1;stroke:#d0dede;stroke-width:0.762739;stroke-linecap:square;stroke-linejoin:round;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1;paint-order:fill markers stroke"
+       id="rect64498"
+       width="197.226"
+       height="55.716022"
+       x="1.4973413"
+       y="1.0499208"
+       inkscape:export-filename="/Users/glendc/code/github.com/plabayo/tsg/docs/images/banner.png"
+       inkscape:export-xdpi="150.08253"
+       inkscape:export-ydpi="150.08253" />
+    <ellipse
+       style="fill:#2b1100;stroke:#c8ebeb;stroke-width:0.499999;stroke-linecap:square;stroke-linejoin:round;paint-order:fill markers stroke"
+       id="path57967-6-3-0"
+       cx="34.811111"
+       cy="46.15493"
+       rx="23.141199"
+       ry="6.5550175" />
+    <text
+       xml:space="preserve"
+       style="font-weight:500;font-size:16.9333px;line-height:1.25;font-family:'Fira Code';-inkscape-font-specification:'Fira Code Medium';stroke:none;stroke-width:0.4;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1;paint-order:stroke fill markers"
+       x="73.212852"
+       y="34.094742"
+       id="text1726"
+       inkscape:export-filename="/Users/glendc/code/github.com/plabayo/tsg/docs/images/banner.png"
+       inkscape:export-xdpi="150.08253"
+       inkscape:export-ydpi="150.08253"><tspan
+         sodipodi:role="line"
+         id="tspan1724"
+         style="font-style:normal;font-variant:normal;font-weight:bold;font-stretch:normal;font-size:16.9333px;font-family:'Fira Code';-inkscape-font-specification:'Fira Code Bold';stroke:none;stroke-width:0.4;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1;paint-order:stroke fill markers"
+         x="73.212852"
+         y="34.094742"><tspan
+   style="fill:#2b1100"
+   id="tspan35388">Al</tspan>uminiumDB</tspan></text>
+    <text
+       xml:space="preserve"
+       style="font-weight:500;font-size:6.70278px;line-height:1.25;font-family:'Fira Code';-inkscape-font-specification:'Fira Code Medium';stroke:none;stroke-width:0.4;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1;paint-order:stroke fill markers"
+       x="73.024223"
+       y="41.631016"
+       id="text1726-0"
+       inkscape:export-filename="/Users/glendc/code/github.com/plabayo/tsg/docs/images/banner.png"
+       inkscape:export-xdpi="150.08253"
+       inkscape:export-ydpi="150.08253"><tspan
+         sodipodi:role="line"
+         id="tspan1724-3"
+         style="font-style:normal;font-variant:normal;font-weight:bold;font-stretch:normal;font-size:6.70278px;font-family:'Fira Code';-inkscape-font-specification:'Fira Code Bold';stroke:none;stroke-width:0.4;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1;paint-order:stroke fill markers"
+         x="73.024223"
+         y="41.631016">an append-log for small data</tspan></text>
+    <path
+       id="path57967-9-3"
+       style="fill:#2b1100;stroke:#c8ebeb;stroke-width:0.499999;stroke-linecap:square;stroke-linejoin:round;paint-order:fill markers stroke"
+       d="M 40.522075,25.302839 14.500407,28.48094 v 11.9078 a 23.141199,6.5550173 0 0 0 -2.930054,3.186885 23.141199,6.5550173 0 0 0 23.141223,6.555156 23.141199,6.5550173 0 0 0 23.141223,-6.555156 23.141199,6.5550173 0 0 0 -2.432926,-2.924886 v -14.15624 z" />
+    <ellipse
+       style="fill:#2b1100;stroke:#c8ebeb;stroke-width:0.499999;stroke-linecap:square;stroke-linejoin:round;paint-order:fill markers stroke"
+       id="path57967-6-3"
+       cx="34.811115"
+       cy="31.446602"
+       rx="23.141199"
+       ry="6.5550175" />
+    <path
+       id="path57967-9"
+       style="fill:#2b1100;stroke:#c8ebeb;stroke-width:0.499999;stroke-linecap:square;stroke-linejoin:round;paint-order:fill markers stroke"
+       d="m 40.124681,11.26339 -26.021666,3.178101 v 11.979113 a 23.141199,6.5550173 0 0 0 -2.532662,2.976047 23.141199,6.5550173 0 0 0 23.141223,6.555155 23.141199,6.5550173 0 0 0 23.141223,-6.555155 23.141199,6.5550173 0 0 0 -2.83032,-3.140893 V 12.455566 Z" />
+    <ellipse
+       style="fill:#2b1100;stroke:#c8ebeb;stroke-width:0.499999;stroke-linecap:square;stroke-linejoin:round;paint-order:fill markers stroke"
+       id="path57967-6"
+       cx="34.761456"
+       cy="13.512095"
+       rx="23.141199"
+       ry="6.5550175" />
+    <ellipse
+       style="fill:#2b1100;stroke:#c8ebeb;stroke-width:0.499999;stroke-linecap:square;stroke-linejoin:round;paint-order:fill markers stroke"
+       id="path57967"
+       cx="34.66214"
+       cy="11.462174"
+       rx="23.141199"
+       ry="6.5550175" />
+    <text
+       xml:space="preserve"
+       style="font-weight:500;font-size:25.4px;line-height:1.25;font-family:'Fira Code';-inkscape-font-specification:'Fira Code Medium';fill:#666666;stroke:#c8ebeb;stroke-width:0.5;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1;paint-order:stroke markers fill"
+       x="20.913021"
+       y="42.176113"
+       id="text1726-7"
+       inkscape:export-filename="/Users/glendc/code/github.com/plabayo/tsg/docs/images/banner.png"
+       inkscape:export-xdpi="150.08253"
+       inkscape:export-ydpi="150.08253"><tspan
+         sodipodi:role="line"
+         id="tspan1724-9"
+         style="font-style:normal;font-variant:normal;font-weight:bold;font-stretch:normal;font-size:25.4px;font-family:'Fira Code';-inkscape-font-specification:'Fira Code Bold';fill:#666666;stroke:#c8ebeb;stroke-width:0.5;stroke-miterlimit:4;stroke-dasharray:none;stroke-opacity:1;paint-order:stroke markers fill"
+         x="20.913021"
+         y="42.176113">Al</tspan></text>
+  </g>
+</svg>
