@@ -15,6 +15,13 @@ All numbers are to be encoded and decoded as LittleEndian.
 
 ### Blob
 
+> **File Path**: "`<db_dir>/blob_<n>.log`"
+>
+> with:
+> - ``n the ordered sequential blob index, starting from `0`;
+> - `prefix` an optional constant that can be configured for an `alumdb` instance;
+> - `db_dir` being the directory used to store the `alumdb` instance;
+
 A blob can have an unlimited amount of records (your data) or a fixed amount of data based on record count or total data size. By default a blob grows unlimited unless specified in its header otherwise.
 
 A blob can also be safely removed without corrupting the rest of the database, but best to only do so once all users of those files have been put offline.
@@ -69,6 +76,13 @@ Blob Header Flags (starting from the lift, one column per bit, omitting unused b
 [crc]: https://en.wikipedia.org/wiki/Cyclic_redundancy_check
 
 ### Index
+
+> **File Path**: "`<db_dir>/<prefix>_index_<n>.log`"
+>
+> with:
+> - `n` the ordered sequential **blob** index;
+> - `prefix` an optional constant that can be configured for an `alumdb` instance;
+> - `db_dir` being the directory used to store the `alumdb` instance;
 
 An index file is linked to [a blob](#blob). It is an optimization and can be recovered from [the blob](#blob)
 should the index file be (partly) corrupted or missing. It is used for reading purposes only.
