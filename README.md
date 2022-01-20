@@ -115,3 +115,5 @@ should the index file be (partly) corrupted or missing. It is used for reading p
 - [CRC-32][crc] is used for the checksum of the entire entry (minus the checksum), no signature alternative available,
   crypto verification is achieved because `record_key`, `record_meta`, `index_meta` and `record_data`
   is all encrypted and thus is to be decrypted prior to be able to use it;
+- if `entry_meta_size` is greater than 0 you are to interpret the `index_meta_size` bytes following an entry
+  as meta attached to that entry;
