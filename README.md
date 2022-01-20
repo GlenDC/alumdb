@@ -6,10 +6,48 @@
 > and while we do plan to dogfeed on it as soon as we can for some of our own applications,
 > it is not advised to use it in a production environment already.
 
+## Architecture
+
+```
+         +------------------+
+         |persistent storage|
+         +--------+-^-------+
+       + - - - - -|-| - - - - - - - - - - - - - - - +
+         storage  | |
+       | +--------v-+-----------------------------+ |
+         | *fs (default persistent storage)       |
+alumdb | | *mem (view / test / dev / cache)       | |
+   lib   | *indexdb (alt. storage for wasm,       |
+(rust) | |            host fs can also be used)   | |   alumcli
+         | *... provide your own implementation,  |   +----------+
+       | |      even from "C" ABI, e.g. useful if | | |CLI Client|
+         |      you want to use your platform     |   +^-+-------+             alumdb
+       | |      specific storage                  | |  | |              ^ |    server (rust)
+         +-------+-^------------------------------+ + -|-|- +   + - - - | | - - -+
+       |         | |                                   | |              | |
+         engine  | |         +-------------------------+-v+ |   | +---+-+-v-+    |
+       | +-------v-+---------+                            +-------> S |RESP2|
+         | business logic w/ |          API               | |   | | E |API  |    |
+       | | memory view       |                            <-------+ R +-----+
+         +-------------------+-^-+-----------------^-+----+ |   | | V +-----+--+ |
+       +- - - - - - - - - +    | |                 | |            | E |HTTP    |
+                          |    | |     +- - - - - -|-|- - - +   | | R |Rest API| |
+                            +--+-v---+             | |            +---+---+-^--+
+                          | |        | |      +----+-v----+     + - - - - | | - -+
+                        ---->   "C"  |        |WASM+JS Lib|               | |
+                          | |   ABI  | |      +-----------+               v |
+                        <---+        |         alumdb NPM
+                          | +--------+ |       package
+                          + - - - - - -+
+```
+
 ## Models
 
-The data is stored in files, called blobs. Each blob file can have an index file. It is however only the blob file which is critical as an index file can always be created (again) from a blob file). All files are to be used
-in append/read only mode. Never-ever should existing data within a file be deleted or modified.
+The data is stored in files, called blobs. Each blob can have an index file. It is however only the blob
+which is critical as an index can always be created (again) from a blob file). All files are to be used
+in append/read only mode. Never-ever should existing data within a file be deleted or modified. The index
+contains entries, where each entry stores the start position and length of the record it points too. The entry
+itself is always fixed size, allowing for efficient key scanning.
 
 All numbers are to be encoded and decoded as LittleEndian.
 
@@ -52,9 +90,10 @@ Blob Header Flags (starting from the lift, one column per bit, omitting unused b
 | `bit` | `name` | `description` |
 |-------|--------|---------------|
 | 0 | `allow_duplicate_keys` | If set duplicate keys are allowed, otherwise it is the key on the smallest offset which is to be used |
-| 1 | `fixed_size_records` | If set all records are the same size and the `record_data_size` in the header will define the fixed size of each record in bytes (not including its header and meta-data). By default this flag is not set and instead records can have dynamic size in which case the `record_size` defines the max allowed record size (in bytes) instead. |
-| 2 | `max_records_as_bytes` | Interpret max_records as `bytes` rather than as a "count of records". |
-| 8 | `ed25519_crypto` | Use [Ed25519][ed25519] for encryption of records and signing of header (used as checksum), otherwise [CRC-64][crc] is used for the checksum (remaining bytes are 0-filled). When this flag is set both the `record_key_size`, `record_meta_size` and `record_data_size` refer to the cipher version of the key and record data. |
+| 1 | `deduplicate_as_last`  | This flag can be only set if `allow_duplicate_keys` is not set. When this flag is set the DB engine is instructed to use the key with the largest offset when multiple positions of the same key are found. |
+| 2 | `fixed_size_records` | If set all records are the same size and the `record_data_size` in the header will define the fixed size of each record in bytes (not including its header and meta-data). By default this flag is not set and instead records can have dynamic size in which case the `record_size` defines the max allowed record size (in bytes) instead. |
+| 3 | `max_records_as_bytes` | Interpret max_records as `bytes` rather than as a "count of records". |
+| 4 | `ed25519_crypto` | Use [Ed25519][ed25519] for encryption of records and signing of header (used as checksum), otherwise [CRC-64][crc] is used for the checksum (remaining bytes are 0-filled). When this flag is set both the `record_key_size`, `record_meta_size` and `record_data_size` refer to the cipher version of the key and record data. |
 | 9 | `plain_key` | Can be set only if `ed25519_crypto` is set and indicates if the keys should be stored as plain text and thus not be encrypted. This makes it cheaper to read but does mean the key data is to be considered public and is also no longer tamper proof. Corruption errors are however still detected via the regular checksum. If this flag is set it also means the `record_key_size` is in fact the actual byte size of the plain bytes of the encoded key |
 
 #### Blob Record
