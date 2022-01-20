@@ -175,7 +175,7 @@ should the index file be (partly) corrupted or missing. It is used for reading p
 Please consult [the Projects page at GitHub](https://github.com/plabayo/alumdb/projects?type=beta)
 for a detailed and up to date planning of all the different milestones.
 
-However, here is more or less the traject —in order— that `AluminiumDB`'s development is following:
+However, here is more or less the traject —in order— that AlumDB's development is following:
 
 - [ ] AlumDB PoC in Rust only, with unit- and integration tests;
 - [ ] Initial version `alumcli`, a command line tool to work directly with `alumcli` persistent data via Cli;
@@ -188,6 +188,6 @@ However, here is more or less the traject —in order— that `AluminiumDB`'s de
 - [ ] Documentation, Iteration & Improvements;
 - [ ] Benchmarks;
 - [ ] Website (built using [TSG]);
-- [ ] `2022.0.1`, the first actual release, ready to dogfeed;
+- [ ] `2022.0.1`, the first alpha release, ready to dogfeed;
 - ...
 - [ ] `2022.1.0`, first stable release (Q4 of 2022);
