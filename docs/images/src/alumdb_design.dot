@@ -1,0 +1,98 @@
+digraph alumdb {
+  graph [compound=true, pad="0.5", ranksep="1.5"];
+  edge [dir="both", color=grey];
+  
+  subgraph cluster_alumdb_rust_lib {
+    color=grey;
+    style=dashed;
+    label="alumdb core lib\n(rust)";
+
+    subgraph cluster_record_storage {
+      color=lightgrey;
+      style=dashed;
+      label="record storage";
+      
+      node [shape=rect];
+      record_storage_memory [label="mem (view)"];
+      record_storage_leveldb [label="LevelDB (web)"];
+  
+      subgraph cluster_binary_storage {
+        color=black;
+        style="";
+        label="FS (default)";
+        
+        binary_storage_fs
+        [label="hostFS (default)", shape=rect, style="", color=black];
+      }
+    }
+    
+    subgraph cluster_engine {
+      color=black;
+      style="";
+      label="engine";
+        
+      node [shape=rect];
+      engine_logic [label="Business Logic\n(crypto, fault-tolerance, ...)"];
+    }
+    
+    subgraph cluster_web {
+      color=lightgrey;
+      style=dashed;
+      label="AlumDB Web Lib";
+        
+      node [shape=rect];
+      web_lib [label="WASM+JS)"];
+    }
+
+    node [shape=rect];
+    c_abi [label="\"C\" ABI"];
+  }
+  
+  subgraph cluster_persistent_storage {
+    color=lightgrey;
+    style=dashed;
+    label="persistent storage\n $ <db_dir>/:";
+      
+    node [shape=note];
+    persistent_storage_blob [label="<prefix>blob<n>.log"];
+    persistent_storage_index [label="<prefix>index<n>.log"];
+    
+    persistent_storage_index -> persistent_storage_blob
+    [dir="single", style=dashed, color=grey];
+  }
+  
+  subgraph cluster_alumdb_rust_server {
+    color=lightgrey;
+    style=dashed;
+    label="alumdb optional\nserver (rust)";
+      
+    node [shape=rect];
+    server_api_resp2 [label="RESP2 API\n(Redis-compatible)"];
+    server_api_rest [label="HTTP Rest API\n(Hyper)"];
+  }
+  
+  binary_storage_fs -> persistent_storage_blob;
+  binary_storage_fs -> persistent_storage_index;
+  engine_logic -> binary_storage_fs [lhead=cluster_record_storage];
+  c_abi -> engine_logic [lhead=cluster_engine];
+
+  c_abi_user [label="...",shape=none];
+  c_abi_user -> c_abi;
+  
+  web_lib_user [label="...",shape=none];
+  web_lib -> web_lib_user;
+  web_lib -> engine_logic [lhead=cluster_engine];
+  
+  server_api_resp2 -> engine_logic [lhead=cluster_engine];
+  server_api_rest -> engine_logic [lhead=cluster_engine];
+ 
+  server_api_resp2_user [label="...",shape=none];
+  server_api_resp2 -> server_api_resp2_user;
+ 
+  server_api_rest_user [label="...",shape=none];
+  server_api_rest -> server_api_rest_user;
+  
+  cluster_engine_rust_user
+  [label="...\n(external rust usage)",shape=none];
+  cluster_engine_rust_user -> engine_logic [lhead=cluster_engine];
+}

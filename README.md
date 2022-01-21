@@ -2,6 +2,17 @@
   <img src="docs/images/banner.png" alt="TSG banner image"/>
 </p>
 
+AluminiumDB (AlumDB) is an embeddable append-log written in
+Rust that can optionally be used via a server as well.
+However database is designed for client-only use cases,
+with the possibility of a client syncing its Database
+between different platforms P2P.
+
+If you want a client->server DB there are plenty of better
+options available. If you look for a (Rust) embeddable DB however
+that can be used as the storage for your Application,
+than AlumDB might be what exactly what you need.
+
 > **WARNING**: this database is highly experimental,
 > and while we do plan to dogfeed on it as soon as we can for some of our own applications,
 > it is not advised to use it in a production environment already.
@@ -11,42 +22,13 @@
 
 Progress towards a first alpha-release of AlumDB is tracked in [the Roadmap section](#roadmap).
 
-## Architecture
+## Design
 
-```
-         +------------------+
-         |persistent storage|
-         +--------+-^-------+
-       + - - - - -|-| - - - - - - - - - - - - - - - +
-         storage  | |
-       | +--------v-+-----------------------------+ |
-         | *fs (default persistent storage)       |
-alumdb | | *mem (view / test / dev / cache)       | |
-   lib   | *indexdb (alt. storage for wasm,       |
-(rust) | |            host fs can also be used)   | |   alumcli
-         | *... provide your own implementation,  |   +----------+
-       | |      even from "C" ABI, e.g. useful if | | |CLI Client|
-         |      you want to use your platform     |   +^-+-------+             alumdb
-       | |      specific storage                  | |  | |              ^ |    server (rust)
-         +-------+-^------------------------------+ + -|-|- +   + - - - | | - - -+
-       |         | |                                   | |              | |
-         engine  | |         +-------------------------+-v+ |   | +---+-+-v-+    |
-       | +-------v-+---------+                            +-------> S |RESP2|
-         | business logic w/ |          API               | |   | | E |API  |    |
-       | | memory view       |                            <-------+ R +-----+
-         +-------------------+-^-+-----------------^-+----+ |   | | V +-----+--+ |
-       +- - - - - - - - - +    | |                 | |            | E |HTTP    |
-                          |    | |     +- - - - - -|-|- - - +   | | R |Rest API| |
-                            +--+-v---+             | |            +---+---+-^--+
-                          | |        | |      +----+-v----+     + - - - - | | - -+
-                        ---->   "C"  |        |WASM+JS Lib|               | |
-                          | |   ABI  | |      +-----------+               v |
-                        <---+        |         alumdb NPM
-                          | +--------+ |       package
-                          + - - - - - -+
-```
+<p align="center">
+  <img src="docs/images/alumdb_design.png" alt="AlumDB Design image (architecture)"/>
+</p>
 
-## Models
+### Models
 
 The data is stored in files, called blobs. Each blob can have an index file. It is however only the blob
 which is critical as an index can always be created (again) from a blob file). All files are to be used
@@ -56,7 +38,7 @@ itself is always fixed size, allowing for efficient key scanning.
 
 All numbers are to be encoded and decoded as LittleEndian.
 
-### Blob
+#### Blob
 
 > **File Path**: "`<db_dir>/blob_<n>.log`"
 >
@@ -73,7 +55,7 @@ A blob can also be safely removed without corrupting the rest of the database, b
 |---------------|-------------|------------|------------|-----|------------| 
 | 130 *B*       | n *B*       | x *B*      | y *B*      | ... | z *B*      |
 
-#### Blob Header
+##### Blob Header
 
 | `magic` | `version` | `flags` | `blob_meta_size` | `record_key_size`  | `record_meta_size` | `record_data_size` | `max_records` | `public_key` | `header_checksum` |
 |---------|-----------|---------|------------------|--------------------|--------------------|--------------------|---------------|--------------|-------------------|
@@ -101,7 +83,7 @@ Blob Header Flags (starting from the lift, one column per bit, omitting unused b
 | 8 | `ed25519_crypto` | Use [Ed25519][ed25519] for encryption of records and signing of header (used as checksum), otherwise [CRC-64][crc] is used for the checksum (remaining bytes are 0-filled). When this flag is set both the `record_key_size`, `record_meta_size` and `record_data_size` refer to the cipher version of the key and record data. |
 | 9 | `plain_key` | Can be set only if `ed25519_crypto` is set and indicates if the keys should be stored as plain text and thus not be encrypted. This makes it cheaper to read but does mean the key data is to be considered public and is also no longer tamper proof. Corruption errors are however still detected via the regular checksum. If this flag is set it also means the `record_key_size` is in fact the actual byte size of the plain bytes of the encoded key |
 
-#### Blob Record
+##### Blob Record
 
 | `record_header` | `record_meta`            | `record_data` |
 |-----------------|--------------------------|---------------|
@@ -113,7 +95,7 @@ Blob Header Flags (starting from the lift, one column per bit, omitting unused b
 - `record_data` content is also opaque to `alumbdb` and used as raw binary data;
 - both `record_meta` and `record_data` _have_ to be decrypted prior to reading in case the blob `ed25519_crypto` is set;
 
-##### Blob Record Header
+###### Blob Record Header
 
 | `checksum` | `record_key`             | `data_size`   | `record_flags` |
 |------------|--------------------------|---------------|----------------|
@@ -126,7 +108,7 @@ Blob Header Flags (starting from the lift, one column per bit, omitting unused b
 [ed25519]: https://ed25519.cr.yp.to/
 [crc]: https://en.wikipedia.org/wiki/Cyclic_redundancy_check
 
-### Index
+#### Index
 
 > **File Path**: "`<db_dir>/<prefix>_index_<n>.log`"
 >
@@ -142,7 +124,7 @@ should the index file be (partly) corrupted or missing. It is used for reading p
 |----------------|--------------|------------|------------|-----|------------| 
 |  *B*           | n *B*        | x *B*      | y *B*      | ... | z *B*      |
 
-#### Index Header
+##### Index Header
 
 | `magic`   | `blob_header_checksum` | `index_meta_size` | `entry_meta_size` | `index_header_checksum` |
 |-----------|------------------------|-------------------|-------------------|-------------------------|
@@ -157,7 +139,7 @@ should the index file be (partly) corrupted or missing. It is used for reading p
 - Uses [Ed25519][ed25519] for encryption for signing of (index) header (used as checksum) in case the [the blob](#blob) `ed25519_crypto` flag,
   otherwise [CRC-64][crc] is used for the checksum (remaining bytes are 0-filled);
 
-#### Index Entry
+##### Index Entry
 
 | `checksum` | `record_key`             | `record_checksum` | `record_data_offset` | `record_data_size` |
 |------------|--------------------------|-------------------|----------------------|------------------|
@@ -178,13 +160,12 @@ for a detailed and up to date planning of all the different milestones.
 However, here is more or less the traject —in order— that AlumDB's development is following:
 
 - [ ] AlumDB PoC in Rust only, with unit- and integration tests;
-- [ ] Initial version `alumcli`, a command line tool to work directly with `alumcli` persistent data via Cli;
 - [ ] Python example up and running for the "C" ABI;
 - [ ] iOS Swift App Example;
 - [ ] WASM+JS Library + WebApp example;
-- [ ] RESP2 Rust Module + integration into `alumcli`;
-- [ ] (Hyper) REST API Rust Module;
 - [ ] Initial version of the AlumDB server;
+  - [ ] RESP2 Rust Module;
+  - [ ] (Hyper) REST API Rust Module;
 - [ ] Documentation, Iteration & Improvements;
 - [ ] Benchmarks;
 - [ ] Website (built using [TSG]);
