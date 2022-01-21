@@ -87,7 +87,7 @@ Blob Header Flags (starting from the lift, one column per bit, omitting unused b
 
 | `record_header` | `record_meta`            | `record_data` |
 |-----------------|--------------------------|---------------|
-| 5 *B*           | `record_meta_size` *B*   | m *B*         |
+| 9+`record_key_size` *B*           | `record_meta_size` *B*   | m *B*         |
 
 > The size of record data (`m`) is a constant in case the `fixed_size_records` (blob) flag is used.
 
