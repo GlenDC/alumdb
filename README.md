@@ -53,13 +53,13 @@ A blob can also be safely removed without corrupting the rest of the database, b
 
 | `blob_header` | `blob_meta` | `record#1` | `record#2` | ... | `record#n` |
 |---------------|-------------|------------|------------|-----|------------| 
-| min 30 *B*, max 130 *B* | n *B* | x *B* | y *B* | ... | z *B* |
+| min 32 *B*, max 132 *B* | n *B* | x *B* | y *B* | ... | z *B* |
 
 ##### Blob Header
 
 | `magic` | `version` | `flags` | `blob_meta_size` | `record_key_size`  | `record_meta_size` | `record_data_size` | `max_records` | `public_key` | `iv_len` | `header_checksum` |
 |---------|-----------|---------|------------------|--------------------|--------------------|--------------------|---------------|--------------|----------|-------------------|
-| 8 *B* | 4 *B* | 2 *B* | 4 *B* | 4 *B* | 4 *B* | 4 *B* | 0 or 4 *B* | 0 or 32 *B* | 0 or 1 *B* | 8 or 64 *B* |
+| 8 *B* | 4 *B* | 4 *B* | 4 *B* | 4 *B* | 4 *B* | 4 *B* | 0 or 4 *B* | 0 or 32 *B* | 0 or 1 *B* | 8 or 64 *B* |
 
 - `magic` is an opaque constant to identify the file type: `0x616C6462626C6230` (7020096292884603440);
 - `version` consist of the year (first 2 byes, e.g. 2022), the revision number (third byte) and the patch number (last byte):
