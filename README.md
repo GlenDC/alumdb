@@ -61,8 +61,8 @@ A blob can also be safely removed without corrupting the rest of the database, b
 |---------|-----------|---------|------------------|--------------------|--------------------|--------------------|---------------|--------------|-------------------|
 | 8 *B*   | 4 *B*     | 2 *B*   | 4 *B*            | 4 *B*              | 4 *B*              | 4 *B*              | 4 *B*         | 32 *B*       | 64 *B*            |
 
-- magic is an opaque constant to identify the file type;
-- version consist of the year (first 2 byes, e.g. 2022), the revision number (third byte) and the patch number (last byte):
+- `magic` is an opaque constant to identify the file type: `0x616C6462626C6230`;
+- `version` consist of the year (first 2 byes, e.g. 2022), the revision number (third byte) and the patch number (last byte):
   - a year bump can contain backwards incompatible changes;
   - revision bumps are to be considered backwards-incompatible within the same year, but are usually introducing new features / major changes;
   - a revision number of `0` is to be considered a pre-release and can break on a frequent basis;
@@ -122,15 +122,15 @@ should the index file be (partly) corrupted or missing. It is used for reading p
 
 | `index_header` | `index_meta` | `entry#1`  | `entry#2`  | ... | `entry#n  `|
 |----------------|--------------|------------|------------|-----|------------| 
-|  *B*           | n *B*        | x *B*      | y *B*      | ... | z *B*      |
+| 144 *B*        | n *B*        | x *B*      | y *B*      | ... | z *B*      |
 
 ##### Index Header
 
 | `magic`   | `blob_header_checksum` | `index_meta_size` | `entry_meta_size` | `index_header_checksum` |
 |-----------|------------------------|-------------------|-------------------|-------------------------|
-| 144 *B*   | 64 *B*                 | 4 *B*             | 4 *B*             | 64 *B*                  |
+| 8 *B*   | 64 *B*                 | 4 *B*             | 4 *B*             | 64 *B*                  |
 
-- `magic` is an opaque constant to identify the file type, it is different from the constant used for blobs;
+- `magic` is an opaque constant to identify the file type, it is different from the constant used for blobs: `0x616C646269647830`;
 - `blob_header_checksum` is a copy of the checksum found in the linked blob's header;
 - `index_meta_size` defines the size of the opaque optional (index) meta data following the index header, and is not used by `alumdb` for any purposes;
   - Note that both the `index_meta_size` and  `entry_meta_size` defines the
