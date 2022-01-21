@@ -168,7 +168,10 @@ However, here is more or less the traject —in order— that AlumDB's developme
   - [ ] (Hyper) REST API Rust Module;
 - [ ] Documentation, Iteration & Improvements;
 - [ ] Benchmarks;
-- [ ] Website (built using [TSG]);
+- [ ] Website (built using [TSG][tsg]);
 - [ ] `2022.0.1`, the first alpha release, ready to dogfeed;
 - ...
 - [ ] `2022.1.0`, first stable release (Q4 of 2022);
+
+
+[tsg]: https://github.com/plabayo/tsg
