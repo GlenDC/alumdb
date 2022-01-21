@@ -53,13 +53,13 @@ A blob can also be safely removed without corrupting the rest of the database, b
 
 | `blob_header` | `blob_meta` | `record#1` | `record#2` | ... | `record#n` |
 |---------------|-------------|------------|------------|-----|------------| 
-| 130 *B*       | n *B*       | x *B*      | y *B*      | ... | z *B*      |
+| min 30 *B*, max 130 *B* | n *B* | x *B* | y *B* | ... | z *B* |
 
 ##### Blob Header
 
-| `magic` | `version` | `flags` | `blob_meta_size` | `record_key_size`  | `record_meta_size` | `record_data_size` | `max_records` | `public_key` | `header_checksum` |
-|---------|-----------|---------|------------------|--------------------|--------------------|--------------------|---------------|--------------|-------------------|
-| 8 *B*   | 4 *B*     | 2 *B*   | 4 *B*            | 4 *B*              | 4 *B*              | 4 *B*              | 4 *B*         | 32 *B*       | 64 *B*            |
+| `magic` | `version` | `flags` | `blob_meta_size` | `record_key_size`  | `record_meta_size` | `record_data_size` | `max_records` | `public_key` | `iv_len` | `header_checksum` |
+|---------|-----------|---------|------------------|--------------------|--------------------|--------------------|---------------|--------------|----------|-------------------|
+| 8 *B* | 4 *B* | 2 *B* | 4 *B* | 4 *B* | 4 *B* | 4 *B* | 0 or 4 *B* | 0 or 32 *B* | 0 or 1 *B* | 8 or 64 *B* |
 
 - `magic` is an opaque constant to identify the file type: `0x616C6462626C6230` (7020096292884603440);
 - `version` consist of the year (first 2 byes, e.g. 2022), the revision number (third byte) and the patch number (last byte):
@@ -69,6 +69,14 @@ A blob can also be safely removed without corrupting the rest of the database, b
   - patch numbers ae bumped for small fixes / updates;
   - older revision versions receive no updates;
   - older year versions receive only patches for their last revision for critical issues and require a motivational request or patch contribution from a community member;
+- optional header parts:
+  - `max_records`: part of header only if `limit_records` flag is set to `1`;
+  - `public_key` and `iv_len`: part of header only if `ed25519_crypto` flag is  set to `1`;
+  - `iv_len` defines the length in bytes of the crypto random input used to prefix the plain- key and data prior to encryption,
+    its only meaning is to make the ciphers unique for different crypto sessions of the same record storage;
+- dynamic size header parts:
+  - `header_checksum`: `64` bytes if `ed25519_crypto` flag is set to `1` as to be able to contain
+    the crypto signature. Otherwise it will contain [CRC-64][crc] with a size of 8 bytes;
 
 The current version is `2022.0.0`, which is `132513792` in decimal and `07 E6 00 00` in hex.
 
@@ -79,7 +87,8 @@ Blob Header Flags (starting from the lift, one column per bit, omitting unused b
 | 0 | `allow_duplicate_keys` | If set duplicate keys are allowed, otherwise it is the key on the smallest offset which is to be used |
 | 1 | `deduplicate_as_last`  | This flag can be only set if `allow_duplicate_keys` is not set. When this flag is set the DB engine is instructed to use the key with the largest offset when multiple positions of the same key are found. |
 | 2 | `fixed_size_records` | If set all records are the same size and the `record_data_size` in the header will define the fixed size of each record in bytes (not including its header and meta-data). By default this flag is not set and instead records can have dynamic size in which case the `record_size` defines the max allowed record size (in bytes) instead. |
-| 3 | `max_records_as_bytes` | Interpret max_records as `bytes` rather than as a "count of records". |
+| 3 | `limit_records` | Limit amount of records stored in one (this) blob, by default there is no limit. `max_records` will be part of the blob header if the flag is set and is expected to be 1 or greater. |
+| 4 | `max_records_as_bytes` | Interpret `max_records` as `bytes` rather than as a "count of records". Can only be set if `limit_records` is set. |
 | 8 | `ed25519_crypto` | Use [Ed25519][ed25519] for encryption of records and signing of header (used as checksum), otherwise [CRC-64][crc] is used for the checksum (remaining bytes are 0-filled). When this flag is set both the `record_key_size`, `record_meta_size` and `record_data_size` refer to the cipher version of the key and record data. |
 | 9 | `plain_key` | Can be set only if `ed25519_crypto` is set and indicates if the keys should be stored as plain text and thus not be encrypted. This makes it cheaper to read but does mean the key data is to be considered public and is also no longer tamper proof. Corruption errors are however still detected via the regular checksum. If this flag is set it also means the `record_key_size` is in fact the actual byte size of the plain bytes of the encoded key |
 
@@ -94,6 +103,7 @@ Blob Header Flags (starting from the lift, one column per bit, omitting unused b
 - `record_meta` content is optional and if defined it is of a fixed size with its content opaque to `alumbdb` and used as raw binary data;
 - `record_data` content is also opaque to `alumbdb` and used as raw binary data;
 - both `record_meta` and `record_data` _have_ to be decrypted prior to reading in case the blob `ed25519_crypto` is set;
+  - also ensure to drop the `iv` prefixed to both the meta and data prior to reading in case `iv_len` (found in [the blob header](#blob-header)) is `> 0`;
 
 ###### Blob Record Header
 
@@ -103,6 +113,8 @@ Blob Header Flags (starting from the lift, one column per bit, omitting unused b
 
 - [CRC-32][crc] is used for the `checksum`, no signature alternative available,
   instead when `ed25519_crypto` is used both the `record_key` and `record_data` are encrypted;
+  - ensure to decrypt the `record_key` prior to usage in case `ed25519_crypto` is used;
+  - also ensure to drop the `iv` prefixed to the key prior to reading in case `iv_len` (found in [the blob header](#blob-header)) is `> 0`;
 - record flags aren't yet used, but are reserved for future usage, for now it is expected to be `0`;
 
 [ed25519]: https://ed25519.cr.yp.to/
@@ -128,7 +140,7 @@ should the index file be (partly) corrupted or missing. It is used for reading p
 
 | `magic`   | `blob_header_checksum` | `index_meta_size` | `entry_meta_size` | `index_header_checksum` |
 |-----------|------------------------|-------------------|-------------------|-------------------------|
-| 8 *B*   | 64 *B*                 | 4 *B*             | 4 *B*             | 64 *B*                  |
+| 8 *B* | 8 or 64 *B* | 4 *B* | 4 *B* | 8 or 64 *B* |
 
 - `magic` is an opaque constant to identify the file type, it is different from the constant used for blobs: `0x616C646269647830` (7020096293001525296);
 - `blob_header_checksum` is a copy of the checksum found in the linked blob's header;
@@ -138,6 +150,10 @@ should the index file be (partly) corrupted or missing. It is used for reading p
     [the blob](#blob) `ed25519_crypto` flag is used;
 - Uses [Ed25519][ed25519] for encryption for signing of (index) header (used as checksum) in case the [the blob](#blob) `ed25519_crypto` flag,
   otherwise [CRC-64][crc] is used for the checksum (remaining bytes are 0-filled);
+- dynamic size header parts:
+  - `blob_header_checksum` and `index_header_checksum`: `64` bytes if `ed25519_crypto` flag
+    (found in [the blob header](#blob-header)) is set to `1` as to be able to contain
+    the crypto signature. Otherwise it will contain [CRC-64][crc] with a size of 8 bytes;
 
 ##### Index Entry
 
@@ -148,6 +164,8 @@ should the index file be (partly) corrupted or missing. It is used for reading p
 - [CRC-32][crc] is used for the checksum of the entire entry (minus the checksum), no signature alternative available,
   crypto verification is achieved because `record_key`, `record_meta`, `index_meta` and `record_data`
   is all encrypted and thus is to be decrypted prior to be able to use it;
+  - ensure to decrypt the `record_key` prior to usage in case `ed25519_crypto` is used;
+  - also ensure to drop the `iv` prefixed to the key prior to reading in case `iv_len` (found in [the blob header](#blob-header)) is `> 0`;
 - if `entry_meta_size` is greater than 0 you are to interpret the `index_meta_size` bytes following an entry
   as meta attached to that entry;
 - `record_checksum` _must_ match the checksum of the record as fund in the `record_header`;
