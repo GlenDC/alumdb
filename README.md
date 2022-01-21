@@ -94,9 +94,9 @@ Blob Header Flags (starting from the lift, one column per bit, omitting unused b
 
 ##### Blob Record
 
-| `record_header` | `record_meta`            | `record_data` |
-|-----------------|--------------------------|---------------|
-| 9+`record_key_size` *B*           | `record_meta_size` *B*   | m *B*         |
+| `record_header` | `record_meta` | `record_data` |
+|-----------------|---------------|---------------|
+| 9+`record_key_size` *B* | `record_meta_size` *B* | m *B* |
 
 > The size of record data (`m`) is a constant in case the `fixed_size_records` (blob) flag is used.
 
@@ -107,9 +107,9 @@ Blob Header Flags (starting from the lift, one column per bit, omitting unused b
 
 ###### Blob Record Header
 
-| `checksum` | `record_key`             | `data_size`   | `record_flags` |
-|------------|--------------------------|---------------|----------------|
-| 4 *B*      | `record_key_size` *B*    | 4 *B*         | 1 *B*          |
+| `checksum` | `record_key` | `data_size` | `record_flags` |
+|------------|--------------|-------------|----------------|
+| 4 *B* | `record_key_size` *B* | 4 *B* | 1 *B* |
 
 - [CRC-32][crc] is used for the `checksum`, no signature alternative available,
   instead when `ed25519_crypto` is used both the `record_key` and `record_data` are encrypted;
@@ -132,14 +132,14 @@ Blob Header Flags (starting from the lift, one column per bit, omitting unused b
 An index file is linked to [a blob](#blob). It is an optimization and can be recovered from [the blob](#blob)
 should the index file be (partly) corrupted or missing. It is used for reading purposes only.
 
-| `index_header` | `index_meta` | `entry#1`  | `entry#2`  | ... | `entry#n  `|
-|----------------|--------------|------------|------------|-----|------------| 
-| 144 *B*        | n *B*        | x *B*      | y *B*      | ... | z *B*      |
+| `index_header` | `index_meta` | `entry#1` | `entry#2` | ... | `entry#n` |
+|----------------|--------------|-----------|-----------|-----|-----------| 
+| min 32 *B*, max 144 *B* | n *B* | x *B* | y *B* | ... | z *B* |
 
 ##### Index Header
 
-| `magic`   | `blob_header_checksum` | `index_meta_size` | `entry_meta_size` | `index_header_checksum` |
-|-----------|------------------------|-------------------|-------------------|-------------------------|
+| `magic` | `blob_header_checksum` | `index_meta_size` | `entry_meta_size` | `index_header_checksum` |
+|---------|------------------------|-------------------|-------------------|-------------------------|
 | 8 *B* | 8 or 64 *B* | 4 *B* | 4 *B* | 8 or 64 *B* |
 
 - `magic` is an opaque constant to identify the file type, it is different from the constant used for blobs: `0x616C646269647830` (7020096293001525296);
@@ -157,9 +157,9 @@ should the index file be (partly) corrupted or missing. It is used for reading p
 
 ##### Index Entry
 
-| `checksum` | `record_key`             | `record_checksum` | `record_data_offset` | `record_data_size` |
-|------------|--------------------------|-------------------|----------------------|------------------|
-| 4 *B*      | `record_key_size` *B*    | 4 *B*             | 4 *B*                | 4 *B*            |
+| `checksum` | `record_key` | `record_checksum` | `record_data_offset` | `record_data_size` |
+|------------|--------------|-------------------|----------------------|------------------|
+| 4 *B* | `record_key_size` *B* | 4 *B* | 4 *B* | 4 *B* |
 
 - [CRC-32][crc] is used for the checksum of the entire entry (minus the checksum), no signature alternative available,
   crypto verification is achieved because `record_key`, `record_meta`, `index_meta` and `record_data`
